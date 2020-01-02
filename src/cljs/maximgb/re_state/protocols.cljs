@@ -49,6 +49,13 @@
      Returns re-frame context."))
 
 
+(defprotocol ChildInterpreterProto
+  "Protocol for interpreters which has reference to parent which is used to send events to."
+
+  (interpreter->parent ^InterpreterProto [this]
+    "Returns this interpreter parent interpreter, nil if no parent present."))
+
+
 (defn interpreter-start!
   "Starts interpreter optionally passing addition payload for `::xs-init` event."
   [interpreter & init-payload]

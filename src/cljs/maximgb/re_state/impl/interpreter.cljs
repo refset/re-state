@@ -79,7 +79,7 @@
 
 
 (defn- interpreter-
-  [path machine]
+  [path machine parent]
   (let [*interpreter (volatile! {:state nil
                                  :started? false})]
     (reify
@@ -150,18 +150,31 @@
           (vswap! *interpreter
                   assoc
                   :state xs-new-state)
-          (rf/enqueue re-ctx (conj interceptors store-state-interceptor exec-interceptor)))))))
+          (rf/enqueue re-ctx (conj interceptors store-state-interceptor exec-interceptor))))
+
+      protocols/ChildInterpreterProto
+
+      (interpreter->parent [this]
+        parent))))
 
 
 (defn interpreter!
   "Creates XState based interpreter which uses re-frame facilities to send/receive and handle events"
 
   ([machine]
-   (interpreter! nil machine))
+   (interpreter! nil machine nil))
 
-  ([path machine]
+  ([path-or-machine machine-or-parent]
+   (let [[path machine proto] (case [(satisfies? protocols/MachineProto path-or-machine)
+                                     (satisfies? protocols/MachineProto machine-or-parent)]
+                                [false true] [path-or-machine machine-or-parent nil]
+                                [true false] [nil path-or-machine machine-or-parent])]
+     (interpreter! path machine parent)))
+
+  ([path machine parent]
    (let [valid-path (or path (gensym ::instance))]
      (interpreter- (if (seqable? valid-path)
                      valid-path
                      [valid-path])
-                   machine))))
+                   machine
+                   parent))))

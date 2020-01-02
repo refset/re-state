@@ -45,13 +45,23 @@
     (@*iregistry id)))
 
 
+;; Returns parent interpreter of the cofx issuing interpreter
+(rs/def-re-service-command
+  :maximgb.re-state.core/re-state
+  :parent
+  [cofx]
+  (let [instance (utils/cofx->interpreter cofx)]
+    (if (satisfies? protocols/ChildInterpreterProto instance)
+      (protocols/interpreter->parent instance))))
+
+
 ;; Spawn a new interpreter with the given machine
 (rs/def-re-service-command
   :maximgb.re-state.core/re-state
   :spawn!
   [cofx & [machine]]
   (if machine
-    (iimpl/interpreter! machine)
+    (iimpl/interpreter! machine (utils/cofx->interpreter cofx))
     (-> cofx
         (utils/cofx->interpreter)
         (protocols/interpreter->machine)
