@@ -165,7 +165,7 @@
    (interpreter! nil machine nil))
 
   ([path-or-machine machine-or-parent]
-   (let [[path machine proto] (case [(satisfies? protocols/MachineProto path-or-machine)
+   (let [[path machine parent] (case [(satisfies? protocols/MachineProto path-or-machine)
                                      (satisfies? protocols/MachineProto machine-or-parent)]
                                 [false true] [path-or-machine machine-or-parent nil]
                                 [true false] [nil path-or-machine machine-or-parent])]
